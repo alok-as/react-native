@@ -16,25 +16,42 @@ SplashScreen.preventAutoHideAsync();
 const App = () => {
 	const [userNumber, setUserNumber] = useState();
 	const [isGameOver, setIsGameOver] = useState(false);
+	const [noOfRounds, setNoOfRounds] = useState(0);
 
 	const [fontsLoaded] = useFonts({
 		"Open-Sans": require("./assets/OpenSans-Regular.ttf"),
 		"Open-Sans-Bold": require("./assets/OpenSans-Bold.ttf"),
 	});
 
-	const startGameHandler = (number) => setUserNumber(number);
-	const endGameHandler = () => setIsGameOver(true);
+	const onStartGameHandler = (number) => setUserNumber(number);
 
-	let screen = <StartGame onStartGame={startGameHandler} />;
+	const onEndGameHandler = (noOfRounds) => {
+		setIsGameOver(true);
+		setNoOfRounds(noOfRounds);
+	};
+
+	const onResetGameHandler = () => {
+		setUserNumber();
+		setNoOfRounds(0);
+		setIsGameOver(false);
+	};
+
+	let screen = <StartGame onStartGame={onStartGameHandler} />;
 
 	if (userNumber) {
 		screen = (
-			<GameScreen userNumber={userNumber} onEndGame={endGameHandler} />
+			<GameScreen userNumber={userNumber} onEndGame={onEndGameHandler} />
 		);
 	}
 
 	if (userNumber && isGameOver) {
-		screen = <GameOver />;
+		screen = (
+			<GameOver
+				userNumber={userNumber}
+				noOfRounds={noOfRounds}
+				onResetGame={onResetGameHandler}
+			/>
+		);
 	}
 
 	const onLayoutRootView = useCallback(async () => {

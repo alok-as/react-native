@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet, Alert, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import Card from "../components/common/card";
 import GuessNumber from "../components/game/guess-number";
+import GuessLog from "../components/game/guess-log";
 import Instruction from "../components/common/instruction";
 import PrimaryButton from "../components/common/primary-button";
 import Title from "../components/common/title";
@@ -25,6 +26,7 @@ const GameScreen = ({ userNumber, onEndGame }) => {
 	const [currentGuess, setCurrentGuess] = useState(
 		generateNumberBetween(minBoundary, maxBoundary, userNumber)
 	);
+	const [guessRounds, setGuessRounds] = useState([]);
 
 	const onNextGuessHandler = (dir) => {
 		if (
@@ -54,11 +56,14 @@ const GameScreen = ({ userNumber, onEndGame }) => {
 		);
 
 		setCurrentGuess(newGuess);
+		setGuessRounds((guessRounds) => [newGuess, ...guessRounds]);
 	};
 
 	useEffect(() => {
 		if (currentGuess === userNumber) {
-			onEndGame();
+			minBoundary = 1;
+			maxBoundary = 100;
+			onEndGame(guessRounds.length);
 		}
 	}, [currentGuess, userNumber, onEndGame]);
 
@@ -91,6 +96,18 @@ const GameScreen = ({ userNumber, onEndGame }) => {
 					</View>
 				</View>
 			</Card>
+			<View style={styles.logs}>
+				<FlatList
+					data={guessRounds}
+					keyExtractor={(item) => item}
+					renderItem={({ item, index }) => (
+						<GuessLog
+							roundNumber={guessRounds.length - index}
+							roundGuess={item}
+						/>
+					)}
+				/>
+			</View>
 		</View>
 	);
 };
@@ -108,6 +125,10 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		flex: 1,
+	},
+	logs: {
+		flex: 1,
+		padding: 16,
 	},
 });
 
